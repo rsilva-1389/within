@@ -1,0 +1,2 @@
+-keep class com.within.app.data.** { *; }
+-keepclassmembers class com.within.app.data.** { *; }

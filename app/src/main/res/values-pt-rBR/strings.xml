@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Within</string>
+    <string name="slogan">um pensamento positivo de cada vez</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Oi, eu sou o Ori</string>
+    <string name="onboarding_welcome_subtitle">Vou te acompanhar com uma mensagem gentil todos os dias — só pra você.</string>
+    <string name="onboarding_welcome_cta">Vamos começar</string>
+
+    <string name="onboarding_name_title">Como posso te chamar?</string>
+    <string name="onboarding_name_subtitle">Assim o Ori conversa direto com você, todo dia.</string>
+    <string name="onboarding_name_hint">Seu nome</string>
+    <string name="onboarding_name_cta">Continuar</string>
+
+    <string name="onboarding_howto_title">Uma mensagem por dia</string>
+    <string name="onboarding_howto_subtitle">Salve as favoritas e compartilhe quando quiser.</string>
+    <string name="onboarding_howto_preview_label">Hoje · 8:00</string>
+    <string name="onboarding_howto_preview_greeting">Bom dia, %s ☀️</string>
+    <string name="onboarding_howto_preview_message">Todo desafio é uma chance de se tornar uma versão melhor de você.</string>
+    <string name="onboarding_howto_cta">Entendi</string>
+
+    <string name="onboarding_reminder_title">Quando o Ori te chama, %s?</string>
+    <string name="onboarding_reminder_subtitle">Escolha um horário pro seu momento.</string>
+    <string name="onboarding_reminder_morning">Manhã</string>
+    <string name="onboarding_reminder_noon">Tarde</string>
+    <string name="onboarding_reminder_evening">Noite</string>
+    <string name="onboarding_reminder_time_label">Horário</string>
+    <string name="onboarding_reminder_cta">Ativar lembrete</string>
+
+    <string name="onboarding_allset_title">Tudo pronto, %s!</string>
+    <string name="onboarding_allset_subtitle">Sua primeira mensagem chega amanhã de manhã. A gente se vê. 🌱</string>
+    <string name="onboarding_allset_cta">Começar</string>
+
+    <!-- Categories (kept for settings) -->
+    <string name="category_self_worth">Autoestima</string>
+    <string name="category_self_kindness">Autocompaixão</string>
+    <string name="category_presence">Presença</string>
+    <string name="category_momentum">Impulso</string>
+    <string name="category_growth">Crescimento</string>
+    <string name="category_reflection">Reflexão</string>
+
+    <!-- Settings reused -->
+    <string name="onboarding_time_slot">Mensagem %d</string>
+
+    <!-- Actions -->
+    <string name="action_continue">Continuar</string>
+    <string name="action_confirm">Confirmar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_settings">Configurações</string>
+    <string name="action_favorite">Favoritar</string>
+    <string name="action_refresh">Nova mensagem</string>
+
+    <!-- Home -->
+    <string name="streak_label">%d dias seguidos</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Configurações</string>
+    <string name="settings_frequency">Mensagens por Dia</string>
+    <string name="settings_categories">Categorias</string>
+    <string name="settings_notification_times">Horários de Notificação</string>
+</resources>

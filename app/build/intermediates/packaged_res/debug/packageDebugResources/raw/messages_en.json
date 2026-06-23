@@ -1,0 +1,39 @@
+{
+  "messages": [
+    { "id": "sw_001", "category": "self_worth", "text": "You are enough, exactly as you are right now." },
+    { "id": "sw_002", "category": "self_worth", "text": "Your value doesn't decrease based on someone's inability to see your worth." },
+    { "id": "sw_003", "category": "self_worth", "text": "You deserve the same love and care you give to others." },
+    { "id": "sw_004", "category": "self_worth", "text": "You don't need to earn your place. You already belong here." },
+    { "id": "sw_005", "category": "self_worth", "text": "The world is better because you are in it." },
+
+    { "id": "sk_001", "category": "self_kindness", "text": "Speak to yourself the way you would speak to someone you love." },
+    { "id": "sk_002", "category": "self_kindness", "text": "Imperfection is not a failure — it's part of being human." },
+    { "id": "sk_003", "category": "self_kindness", "text": "You don't have to earn rest. Rest is a right, not a reward." },
+    { "id": "sk_004", "category": "self_kindness", "text": "Forgive yourself for the things you didn't know then. You know more now." },
+    { "id": "sk_005", "category": "self_kindness", "text": "Being gentle with yourself is not weakness. It's wisdom." },
+
+    { "id": "pr_001", "category": "presence", "text": "This moment, right here, is where your life is happening." },
+    { "id": "pr_002", "category": "presence", "text": "Take a breath. You're here. That's enough for now." },
+    { "id": "pr_003", "category": "presence", "text": "Slow down. The present moment has everything you need." },
+    { "id": "pr_004", "category": "presence", "text": "You can't be in two places at once. Be here." },
+    { "id": "pr_005", "category": "presence", "text": "The most powerful thing you can do right now is pay attention." },
+
+    { "id": "mo_001", "category": "momentum", "text": "Small steps taken consistently create big change." },
+    { "id": "mo_002", "category": "momentum", "text": "You don't need motivation to start. You need to start to find motivation." },
+    { "id": "mo_003", "category": "momentum", "text": "One percent better every day. That's all it takes." },
+    { "id": "mo_004", "category": "momentum", "text": "Done is better than perfect. Start before you're ready." },
+    { "id": "mo_005", "category": "momentum", "text": "The only way out is through. Keep going." },
+
+    { "id": "gr_001", "category": "growth", "text": "Every challenge is a chance to become a stronger version of yourself." },
+    { "id": "gr_002", "category": "growth", "text": "The discomfort you feel today is the growth you'll celebrate tomorrow." },
+    { "id": "gr_003", "category": "growth", "text": "You are not who you were yesterday. You are learning, evolving, becoming." },
+    { "id": "gr_004", "category": "growth", "text": "Growth doesn't happen in comfort zones. Lean into the stretch." },
+    { "id": "gr_005", "category": "growth", "text": "Every mistake is data. You're not failing — you're learning." },
+
+    { "id": "re_001", "category": "reflection", "text": "What if everything you've been through was preparing you for this moment?" },
+    { "id": "re_002", "category": "reflection", "text": "Pause. What has this week taught you about yourself?" },
+    { "id": "re_003", "category": "reflection", "text": "The stories you tell yourself shape the life you live. Choose them wisely." },
+    { "id": "re_004", "category": "reflection", "text": "What would you do today if you weren't afraid?" },
+    { "id": "re_005", "category": "reflection", "text": "Who have you become? Look back — you've come further than you think." }
+  ]
+}
