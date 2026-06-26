@@ -29,6 +29,9 @@ class UserPreferences @Inject constructor(
         val FAVORITE_MESSAGE_IDS = stringPreferencesKey("favorite_message_ids")
         val STREAK_COUNT = intPreferencesKey("streak_count")
         val LAST_INTERACTION_DATE = stringPreferencesKey("last_interaction_date")
+        val ACTIVE_JOURNEY_ID = stringPreferencesKey("active_journey_id")
+        val IS_PREMIUM = booleanPreferencesKey("is_premium")
+        val PAYWALL_TAP_COUNT = intPreferencesKey("paywall_tap_count")
     }
 
     val isOnboardingCompleted: Flow<Boolean> = store.data.map { it[ONBOARDING_COMPLETED] ?: false }
@@ -56,6 +59,12 @@ class UserPreferences @Inject constructor(
     }
 
     val streakCount: Flow<Int> = store.data.map { it[STREAK_COUNT] ?: 0 }
+
+    /** Id of the journey the user is currently on, or null when none is active. */
+    val activeJourneyId: Flow<String?> = store.data.map { it[ACTIVE_JOURNEY_ID] }
+
+    /** Stub entitlement flag — replaced by Google Play Billing in Phase 3. */
+    val isPremium: Flow<Boolean> = store.data.map { it[IS_PREMIUM] ?: false }
 
     suspend fun setOnboardingCompleted() {
         store.edit { it[ONBOARDING_COMPLETED] = true }
@@ -103,5 +112,21 @@ class UserPreferences @Inject constructor(
             prefs[LAST_INTERACTION_DATE] = todayDate
             prefs[STREAK_COUNT] = if (last == null) 1 else streak + 1
         }
+    }
+
+    suspend fun setActiveJourneyId(journeyId: String?) {
+        store.edit { prefs ->
+            if (journeyId == null) prefs.remove(ACTIVE_JOURNEY_ID)
+            else prefs[ACTIVE_JOURNEY_ID] = journeyId
+        }
+    }
+
+    suspend fun setPremium(premium: Boolean) {
+        store.edit { it[IS_PREMIUM] = premium }
+    }
+
+    /** Local willingness-to-pay signal: count day-8 paywall taps until real billing lands. */
+    suspend fun recordPaywallTap() {
+        store.edit { it[PAYWALL_TAP_COUNT] = (it[PAYWALL_TAP_COUNT] ?: 0) + 1 }
     }
 }

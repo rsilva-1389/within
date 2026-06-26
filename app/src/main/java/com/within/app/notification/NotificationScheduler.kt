@@ -29,10 +29,10 @@ class NotificationScheduler @Inject constructor(
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Daily Messages",
+            "Daily Reflections",
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Within daily positive messages"
+            description = "Your daily journey prompt and evening reflection"
         }
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.createNotificationChannel(channel)

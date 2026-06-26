@@ -1,9 +1,14 @@
 package com.within.app;
 
 import com.within.app.di.AppModule;
+import com.within.app.di.DatabaseModule;
 import com.within.app.notification.BootReceiver_GeneratedInjector;
 import com.within.app.notification.NotificationReceiver_GeneratedInjector;
 import com.within.app.ui.home.HomeViewModel_HiltModules;
+import com.within.app.ui.journey.JourneyDayViewModel_HiltModules;
+import com.within.app.ui.journey.JourneyMapViewModel_HiltModules;
+import com.within.app.ui.journey.JourneyTodayViewModel_HiltModules;
+import com.within.app.ui.journey.ReflectionsViewModel_HiltModules;
 import com.within.app.ui.navigation.NavigationViewModel_HiltModules;
 import com.within.app.ui.onboarding.OnboardingViewModel_HiltModules;
 import com.within.app.ui.settings.SettingsViewModel_HiltModules;
@@ -133,6 +138,7 @@ public final class WithinApplication_HiltComponents {
       modules = {
           AppModule.class,
           ApplicationContextModule.class,
+          DatabaseModule.class,
           HiltWrapper_FragmentGetContextFix_FragmentGetContextFixModule.class,
           ActivityRetainedCBuilderModule.class,
           ServiceCBuilderModule.class
@@ -163,8 +169,12 @@ public final class WithinApplication_HiltComponents {
           HiltWrapper_ActivityRetainedComponentManager_LifecycleModule.class,
           HiltWrapper_SavedStateHandleModule.class,
           HomeViewModel_HiltModules.KeyModule.class,
+          JourneyDayViewModel_HiltModules.KeyModule.class,
+          JourneyMapViewModel_HiltModules.KeyModule.class,
+          JourneyTodayViewModel_HiltModules.KeyModule.class,
           NavigationViewModel_HiltModules.KeyModule.class,
           OnboardingViewModel_HiltModules.KeyModule.class,
+          ReflectionsViewModel_HiltModules.KeyModule.class,
           SettingsViewModel_HiltModules.KeyModule.class,
           ActivityCBuilderModule.class,
           ViewModelCBuilderModule.class
@@ -205,8 +215,12 @@ public final class WithinApplication_HiltComponents {
       modules = {
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
           HomeViewModel_HiltModules.BindsModule.class,
+          JourneyDayViewModel_HiltModules.BindsModule.class,
+          JourneyMapViewModel_HiltModules.BindsModule.class,
+          JourneyTodayViewModel_HiltModules.BindsModule.class,
           NavigationViewModel_HiltModules.BindsModule.class,
           OnboardingViewModel_HiltModules.BindsModule.class,
+          ReflectionsViewModel_HiltModules.BindsModule.class,
           SettingsViewModel_HiltModules.BindsModule.class
       }
   )

@@ -1,58 +1,46 @@
 [
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/font_nunito_bold.ttf.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/font/nunito_bold.ttf"
+        "merged": "com.within.app-debug-79:/font_nunito_semibold.ttf.flat",
+        "source": "com.within.app-main-81:/font/nunito_semibold.ttf"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/font_nunito_extrabold.ttf.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/font/nunito_extrabold.ttf"
+        "merged": "com.within.app-debug-79:/font_nunito_regular.ttf.flat",
+        "source": "com.within.app-main-81:/font/nunito_regular.ttf"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/drawable_ori_salute.webp.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/drawable/ori_salute.webp"
+        "merged": "com.within.app-debug-79:/raw_journey_en.json.flat",
+        "source": "com.within.app-main-81:/raw/journey_en.json"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/drawable_ori_sleeping.webp.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/drawable/ori_sleeping.webp"
+        "merged": "com.within.app-debug-79:/raw_messages_en.json.flat",
+        "source": "com.within.app-main-81:/raw/messages_en.json"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/font_nunito_semibold.ttf.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/font/nunito_semibold.ttf"
+        "merged": "com.within.app-debug-79:/drawable_ic_notification.xml.flat",
+        "source": "com.within.app-main-81:/drawable/ic_notification.xml"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/drawable_ori_warmheart.webp.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/drawable/ori_warmheart.webp"
+        "merged": "com.within.app-debug-79:/font_fredoka_regular.ttf.flat",
+        "source": "com.within.app-main-81:/font/fredoka_regular.ttf"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/drawable_ori_thinking.webp.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/drawable/ori_thinking.webp"
+        "merged": "com.within.app-debug-79:/raw_messages_pt_br.json.flat",
+        "source": "com.within.app-main-81:/raw/messages_pt_br.json"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/font_fredoka_semibold.ttf.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/font/fredoka_semibold.ttf"
+        "merged": "com.within.app-debug-79:/xml_file_paths.xml.flat",
+        "source": "com.within.app-main-81:/xml/file_paths.xml"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/font_fredoka_regular.ttf.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/font/fredoka_regular.ttf"
+        "merged": "com.within.app-debug-79:/font_nunito_extrabold.ttf.flat",
+        "source": "com.within.app-main-81:/font/nunito_extrabold.ttf"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/drawable_ori_gratitude.webp.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/drawable/ori_gratitude.webp"
+        "merged": "com.within.app-debug-79:/font_nunito_bold.ttf.flat",
+        "source": "com.within.app-main-81:/font/nunito_bold.ttf"
     },
     {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/raw_messages_en.json.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/raw/messages_en.json"
-    },
-    {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/raw_messages_pt_br.json.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/raw/messages_pt_br.json"
-    },
-    {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/font_nunito_regular.ttf.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/font/nunito_regular.ttf"
-    },
-    {
-        "merged": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-debug-76:/drawable_ic_notification.xml.flat",
-        "source": "/home/rsilva/.gradle/daemon/9.3.0/com.within.app-main-78:/drawable/ic_notification.xml"
+        "merged": "com.within.app-debug-79:/font_fredoka_semibold.ttf.flat",
+        "source": "com.within.app-main-81:/font/fredoka_semibold.ttf"
     }
 ]

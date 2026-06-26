@@ -8,14 +8,10 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,14 +42,15 @@ fun OnboardingScreen(
 ) {
     val step by viewModel.step.collectAsState()
     val name by viewModel.name.collectAsState()
+    val mood by viewModel.mood.collectAsState()
+    val desiredFeeling by viewModel.desiredFeeling.collectAsState()
     val timeOfDay by viewModel.timeOfDay.collectAsState()
     val notificationTime by viewModel.notificationTime.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
-        viewModel.completeOnboarding()
-        onFinished()
+        viewModel.completeOnboarding(onDone = onFinished)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -71,32 +68,50 @@ fun OnboardingScreen(
             label = "onboarding_step"
         ) { current ->
             when (current) {
-                0 -> WelcomeStep(onNext = { viewModel.nextStep() })
-                1 -> NameStep(
+                OnboardingSteps.COVER -> CoverStep(onNext = viewModel::nextStep)
+                OnboardingSteps.INTRO -> IntroStep(onNext = viewModel::nextStep)
+                OnboardingSteps.NAME -> NameStep(
                     name = name,
                     onNameChange = viewModel::setName,
-                    onNext = { viewModel.nextStep() }
+                    onNext = viewModel::nextStep
                 )
-                2 -> HowItWorksStep(
+                OnboardingSteps.MOOD -> MoodStep(
                     name = name,
-                    onNext = { viewModel.nextStep() }
+                    selected = mood,
+                    onSelect = viewModel::setMood,
+                    onNext = viewModel::nextStep
                 )
-                3 -> ReminderStep(
+                OnboardingSteps.RESPOND -> RespondStep(
+                    name = name,
+                    mood = mood,
+                    onNext = viewModel::nextStep
+                )
+                OnboardingSteps.FEELING -> FeelingStep(
+                    selected = desiredFeeling,
+                    onSelect = viewModel::setDesiredFeeling,
+                    onNext = viewModel::nextStep
+                )
+                OnboardingSteps.STAGES -> StagesStep(
+                    desiredFeeling = desiredFeeling,
+                    onNext = viewModel::nextStep
+                )
+                OnboardingSteps.DAY -> DayStep(onNext = viewModel::nextStep)
+                OnboardingSteps.PROMISES -> PromisesStep(onNext = viewModel::nextStep)
+                OnboardingSteps.REMINDER -> ReminderStep(
                     name = name,
                     timeOfDay = timeOfDay,
                     notificationTime = notificationTime,
                     onTimeOfDayChange = viewModel::setTimeOfDay,
                     onTimeChange = viewModel::setNotificationTime,
-                    onNext = { viewModel.nextStep() }
+                    onNext = viewModel::nextStep
                 )
-                4 -> AllSetStep(
+                OnboardingSteps.ALL_SET -> AllSetStep(
                     name = name,
                     onFinish = {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         } else {
-                            viewModel.completeOnboarding()
-                            onFinished()
+                            viewModel.completeOnboarding(onDone = onFinished)
                         }
                     }
                 )
@@ -108,7 +123,7 @@ fun OnboardingScreen(
 // ── Shared UI helpers ────────────────────────────────────────────────────────
 
 enum class CompanionExpression {
-    Warmheart, Thinking, Waving, Sleeping, Gratitude;
+    Warmheart, Thinking, Waving, Sleeping, Gratitude, Compassion;
 
     val assetName: String get() = name.lowercase()
 }
@@ -120,9 +135,12 @@ private fun rememberCompanionPainter(
 ): androidx.compose.ui.graphics.painter.Painter {
     val context = LocalContext.current
     return remember(companion, expression) {
-        val bitmap = context.assets
-            .open("$companion/expressions/${companion}_${expression.assetName}.webp")
+        fun decode(name: String) = context.assets
+            .open("$companion/expressions/${companion}_$name.webp")
             .use { android.graphics.BitmapFactory.decodeStream(it) }
+        // Fall back to Warmheart if an expression asset hasn't been added yet.
+        val bitmap = runCatching { decode(expression.assetName) }
+            .getOrElse { decode(CompanionExpression.Warmheart.assetName) }
         androidx.compose.ui.graphics.painter.BitmapPainter(bitmap.asImageBitmap())
     }
 }
@@ -155,26 +173,6 @@ private fun CompanionImage(
             .height(height)
             .offset(y = offsetY.dp)
     )
-}
-
-@Composable
-private fun ProgressDots(totalSteps: Int, currentStep: Int, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(7.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        repeat(totalSteps) { index ->
-            val isActive = index == currentStep
-            Box(
-                modifier = Modifier
-                    .height(7.dp)
-                    .width(if (isActive) 22.dp else 7.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(if (isActive) Warm else OnboardingDot)
-            )
-        }
-    }
 }
 
 @Composable
@@ -226,39 +224,90 @@ private fun OnboardingScaffold(
     )
 }
 
-// ── Step 0: Welcome ──────────────────────────────────────────────────────────
-
+/** Image-on-top, text-and-button-at-bottom scaffold shared by Ori's narrative beats. */
 @Composable
-private fun WelcomeStep(onNext: () -> Unit) {
-    OnboardingScaffold {
+private fun OriNarrativeStep(
+    expression: CompanionExpression,
+    imageHeight: Dp,
+    ctaText: String,
+    onNext: () -> Unit,
+    background: Color = OnboardingBg,
+    floating: Boolean = true,
+    ctaColor: Color = Warm,
+    text: @Composable ColumnScope.() -> Unit
+) {
+    OnboardingScaffold(background = background) {
         Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
             CompanionImage(
                 companion = "ori",
-                expression = CompanionExpression.Warmheart,
-                height = 210.dp,
-                floating = true
+                expression = expression,
+                height = imageHeight,
+                floating = floating
             )
         }
         Column {
-            Text(
-                text = stringResource(R.string.onboarding_welcome_title),
-                style = MaterialTheme.typography.headlineLarge,
-                color = OnboardingText
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = stringResource(R.string.onboarding_welcome_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
-                color = OnboardingTextSecondary
-            )
-            ProgressDots(totalSteps = 5, currentStep = 0, modifier = Modifier.padding(top = 22.dp))
+            text()
             Spacer(Modifier.height(18.dp))
-            OnboardingButton(text = stringResource(R.string.onboarding_welcome_cta), onClick = onNext)
+            OnboardingButton(text = ctaText, onClick = onNext, color = ctaColor)
         }
     }
 }
 
-// ── Step 1: Name ─────────────────────────────────────────────────────────────
+// ── Step 0: Cover ────────────────────────────────────────────────────────────
+
+@Composable
+private fun CoverStep(onNext: () -> Unit) {
+    OriNarrativeStep(
+        expression = CompanionExpression.Warmheart,
+        imageHeight = 210.dp,
+        ctaText = stringResource(R.string.onboarding_cover_cta),
+        onNext = onNext
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_cover_title),
+            style = MaterialTheme.typography.headlineLarge,
+            color = OnboardingText
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = stringResource(R.string.onboarding_cover_subtitle),
+            style = MaterialTheme.typography.titleMedium,
+            color = Supportive
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = stringResource(R.string.onboarding_cover_tagline),
+            style = MaterialTheme.typography.bodyLarge,
+            color = OnboardingTextSecondary
+        )
+    }
+}
+
+// ── Step 1: Ori arrives ──────────────────────────────────────────────────────
+
+@Composable
+private fun IntroStep(onNext: () -> Unit) {
+    OriNarrativeStep(
+        expression = CompanionExpression.Waving,
+        imageHeight = 190.dp,
+        ctaText = stringResource(R.string.onboarding_intro_cta),
+        onNext = onNext
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_intro_title),
+            style = MaterialTheme.typography.headlineMedium,
+            color = OnboardingText
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = stringResource(R.string.onboarding_intro_body),
+            style = MaterialTheme.typography.bodyLarge,
+            color = OnboardingTextSecondary
+        )
+    }
+}
+
+// ── Step 2: Name ─────────────────────────────────────────────────────────────
 
 @Composable
 private fun NameStep(name: String, onNameChange: (String) -> Unit, onNext: () -> Unit) {
@@ -281,12 +330,6 @@ private fun NameStep(name: String, onNameChange: (String) -> Unit, onNext: () ->
                 style = MaterialTheme.typography.headlineMedium,
                 color = OnboardingText
             )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.onboarding_name_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
-                color = OnboardingTextSecondary
-            )
             Spacer(Modifier.height(18.dp))
             NameInputField(
                 value = name,
@@ -294,8 +337,7 @@ private fun NameStep(name: String, onNameChange: (String) -> Unit, onNext: () ->
                 onDone = { if (name.isNotBlank()) onNext() },
                 focusRequester = focusRequester
             )
-            ProgressDots(totalSteps = 5, currentStep = 1, modifier = Modifier.padding(top = 18.dp))
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(18.dp))
             OnboardingButton(
                 text = stringResource(R.string.onboarding_name_cta),
                 onClick = onNext,
@@ -348,105 +390,294 @@ private fun NameInputField(
     )
 }
 
-// ── Step 2: How it works ─────────────────────────────────────────────────────
+// ── Step 3: Mood check-in ────────────────────────────────────────────────────
 
 @Composable
-private fun HowItWorksStep(name: String, onNext: () -> Unit) {
-    val displayName = name.ifBlank { stringResource(R.string.onboarding_name_hint) }
-
+private fun MoodStep(
+    name: String,
+    selected: Mood?,
+    onSelect: (Mood) -> Unit,
+    onNext: () -> Unit
+) {
     OnboardingScaffold {
-        Spacer(Modifier.height(8.dp))
+        Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+            CompanionImage(
+                companion = "ori",
+                expression = CompanionExpression.Warmheart,
+                height = 150.dp,
+                floating = true
+            )
+        }
+        Column {
+            Text(
+                text = stringResource(R.string.onboarding_mood_title, name.trim()),
+                style = MaterialTheme.typography.headlineMedium,
+                color = OnboardingText
+            )
+            Spacer(Modifier.height(18.dp))
+            MoodGrid(selected = selected, onSelect = onSelect)
+            Spacer(Modifier.height(18.dp))
+            OnboardingButton(
+                text = stringResource(R.string.onboarding_name_cta),
+                onClick = onNext,
+                enabled = selected != null
+            )
+        }
+    }
+}
+
+@Composable
+private fun MoodGrid(selected: Mood?, onSelect: (Mood) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Mood.entries.chunked(3).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                row.forEach { mood ->
+                    MoodChip(
+                        label = stringResource(mood.labelRes),
+                        isSelected = mood == selected,
+                        onClick = { onSelect(mood) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MoodChip(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .height(52.dp)
+            .shadow(
+                elevation = if (isSelected) 6.dp else 0.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Warm.copy(alpha = 0.18f)
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .border(
+                2.dp,
+                if (isSelected) Warm else Color(0xFFEFE7D8),
+                RoundedCornerShape(16.dp)
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (isSelected) OnboardingText else OnboardingTextSecondary
+        )
+    }
+}
+
+// ── Step 4: Ori responds (struggling only) ───────────────────────────────────
+
+@Composable
+private fun RespondStep(name: String, mood: Mood?, onNext: () -> Unit) {
+    val responseRes = mood?.responseRes ?: R.string.onboarding_respond_tired
+    OriNarrativeStep(
+        expression = CompanionExpression.Compassion,
+        imageHeight = 190.dp,
+        ctaText = stringResource(R.string.onboarding_respond_cta),
+        onNext = onNext,
+        background = OnboardingBgSage,
+        floating = false
+    ) {
+        Text(
+            text = stringResource(responseRes, name.trim()),
+            style = MaterialTheme.typography.headlineSmall.copy(lineHeight = 30.sp),
+            color = OnboardingText
+        )
+    }
+}
+
+// ── Step 5: Desired feeling ──────────────────────────────────────────────────
+
+@Composable
+private fun FeelingStep(
+    selected: DesiredFeeling?,
+    onSelect: (DesiredFeeling) -> Unit,
+    onNext: () -> Unit
+) {
+    OnboardingScaffold {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 6.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
             contentAlignment = Alignment.Center
         ) {
             CompanionImage(
                 companion = "ori",
-                expression = CompanionExpression.Waving,
-                height = 150.dp,
-                floating = false
+                expression = CompanionExpression.Thinking,
+                height = 140.dp,
+                floating = true
             )
         }
-        Spacer(Modifier.height(12.dp))
-        MessagePreviewCard(displayName = displayName)
-        Spacer(Modifier.weight(1f))
-        Column {
-            Text(
-                text = stringResource(R.string.onboarding_howto_title),
-                style = MaterialTheme.typography.headlineSmall,
-                color = OnboardingText
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = stringResource(R.string.onboarding_howto_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = OnboardingTextSecondary
-            )
-            ProgressDots(totalSteps = 5, currentStep = 2, modifier = Modifier.padding(top = 16.dp))
-            Spacer(Modifier.height(14.dp))
-            OnboardingButton(text = stringResource(R.string.onboarding_howto_cta), onClick = onNext)
-        }
-    }
-}
-
-@Composable
-private fun MessagePreviewCard(displayName: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(8.dp, RoundedCornerShape(22.dp), ambientColor = Color(0x1A3D5A3C))
-            .clip(RoundedCornerShape(22.dp))
-            .background(Color.White)
-            .border(1.5.dp, OnboardingCard, RoundedCornerShape(22.dp))
-            .padding(18.dp)
-    ) {
+        Spacer(Modifier.height(18.dp))
         Text(
-            text = stringResource(R.string.onboarding_howto_preview_label),
-            style = MaterialTheme.typography.labelSmall,
-            color = Supportive
-        )
-        Spacer(Modifier.height(5.dp))
-        Text(
-            text = stringResource(R.string.onboarding_howto_preview_greeting, displayName),
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = 15.sp),
-            color = Positive
-        )
-        Spacer(Modifier.height(7.dp))
-        Text(
-            text = stringResource(R.string.onboarding_howto_preview_message),
-            style = MaterialTheme.typography.titleLarge,
+            text = stringResource(R.string.onboarding_feeling_title),
+            style = MaterialTheme.typography.headlineMedium,
             color = OnboardingText
         )
-        Spacer(Modifier.height(14.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            ActionIconButton(
-                icon = { Icon(Icons.Default.Favorite, null, tint = Warm, modifier = Modifier.size(17.dp)) },
-                background = Color(0xFFFFF0EB)
-            )
-            ActionIconButton(
-                icon = { Icon(Icons.Default.ThumbUp, null, tint = Positive, modifier = Modifier.size(16.dp)) },
-                background = Color(0xFFEEF4EF)
-            )
+        Spacer(Modifier.height(18.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            DesiredFeeling.entries.forEach { feeling ->
+                FeelingOption(
+                    label = stringResource(feeling.labelRes),
+                    isSelected = feeling == selected,
+                    onClick = { onSelect(feeling) }
+                )
+            }
         }
+        Spacer(Modifier.weight(1f))
+        OnboardingButton(
+            text = stringResource(R.string.onboarding_name_cta),
+            onClick = onNext,
+            enabled = selected != null
+        )
     }
 }
 
 @Composable
-private fun ActionIconButton(icon: @Composable () -> Unit, background: Color) {
+private fun FeelingOption(label: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(34.dp)
-            .clip(CircleShape)
-            .background(background),
-        contentAlignment = Alignment.Center
+            .fillMaxWidth()
+            .shadow(
+                elevation = if (isSelected) 6.dp else 0.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Warm.copy(alpha = 0.18f)
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .border(
+                2.dp,
+                if (isSelected) Warm else Color(0xFFEFE7D8),
+                RoundedCornerShape(16.dp)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 16.dp),
+        contentAlignment = Alignment.CenterStart
     ) {
-        icon()
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (isSelected) OnboardingText else OnboardingTextSecondary
+        )
     }
 }
 
-// ── Step 3: Reminder ─────────────────────────────────────────────────────────
+// ── Step 6: Ori names the journey ────────────────────────────────────────────
+
+@Composable
+private fun StagesStep(desiredFeeling: DesiredFeeling?, onNext: () -> Unit) {
+    val connectorRes = desiredFeeling?.connectorRes ?: R.string.onboarding_stage_connector_peace
+    OriNarrativeStep(
+        expression = CompanionExpression.Waving,
+        imageHeight = 150.dp,
+        ctaText = stringResource(R.string.onboarding_stages_cta),
+        onNext = onNext
+    ) {
+        Text(
+            text = stringResource(connectorRes),
+            style = MaterialTheme.typography.titleLarge.copy(lineHeight = 28.sp),
+            color = OnboardingText
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = stringResource(R.string.onboarding_stages_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnboardingTextSecondary
+        )
+    }
+}
+
+// ── Step 7: How a day works ──────────────────────────────────────────────────
+
+@Composable
+private fun DayStep(onNext: () -> Unit) {
+    val rows = listOf(
+        "🌅" to R.string.onboarding_day_reflection,
+        "✍️" to R.string.onboarding_day_prompt,
+        "🔍" to R.string.onboarding_day_deepdive,
+        "🫧" to R.string.onboarding_day_reaffirm,
+        "🚶" to R.string.onboarding_day_action,
+        "🌙" to R.string.onboarding_day_evening,
+    )
+    OnboardingScaffold {
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.onboarding_day_title),
+            style = MaterialTheme.typography.headlineSmall,
+            color = OnboardingText
+        )
+        Spacer(Modifier.height(18.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            rows.forEach { (emoji, textRes) ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = emoji, fontSize = 20.sp)
+                    Spacer(Modifier.width(14.dp))
+                    Text(
+                        text = stringResource(textRes),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = OnboardingText
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.weight(1f))
+        OnboardingButton(text = stringResource(R.string.onboarding_day_cta), onClick = onNext)
+    }
+}
+
+// ── Step 8: The promises ─────────────────────────────────────────────────────
+
+@Composable
+private fun PromisesStep(onNext: () -> Unit) {
+    val promises = listOf(
+        R.string.onboarding_promises_1,
+        R.string.onboarding_promises_2,
+        R.string.onboarding_promises_3,
+    )
+    OnboardingScaffold {
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CompanionImage(
+                companion = "ori",
+                expression = CompanionExpression.Warmheart,
+                height = 140.dp,
+                floating = true
+            )
+        }
+        Spacer(Modifier.height(18.dp))
+        Text(
+            text = stringResource(R.string.onboarding_promises_title),
+            style = MaterialTheme.typography.headlineSmall,
+            color = OnboardingText
+        )
+        Spacer(Modifier.height(16.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            promises.forEach { textRes ->
+                Text(
+                    text = stringResource(textRes),
+                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
+                    color = OnboardingTextSecondary
+                )
+            }
+        }
+        Spacer(Modifier.weight(1f))
+        OnboardingButton(text = stringResource(R.string.onboarding_promises_cta), onClick = onNext)
+    }
+}
+
+// ── Step 9: Reminder ─────────────────────────────────────────────────────────
 
 @Composable
 private fun ReminderStep(
@@ -494,8 +725,7 @@ private fun ReminderStep(
             )
             Spacer(Modifier.height(12.dp))
             TimeDisplayRow(time = notificationTime)
-            ProgressDots(totalSteps = 5, currentStep = 3, modifier = Modifier.padding(top = 16.dp))
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(18.dp))
             OnboardingButton(
                 text = stringResource(R.string.onboarding_reminder_cta),
                 onClick = onNext
@@ -572,7 +802,7 @@ private fun TimeDisplayRow(time: String) {
     }
 }
 
-// ── Step 4: All set ──────────────────────────────────────────────────────────
+// ── Step 10: All set ─────────────────────────────────────────────────────────
 
 @Composable
 private fun AllSetStep(name: String, onFinish: () -> Unit) {
@@ -614,8 +844,7 @@ private fun AllSetStep(name: String, onFinish: () -> Unit) {
                     style = MaterialTheme.typography.bodyLarge,
                     color = OnboardingTextSecondary
                 )
-                ProgressDots(totalSteps = 5, currentStep = 4, modifier = Modifier.padding(top = 22.dp))
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(22.dp))
                 OnboardingButton(
                     text = stringResource(R.string.onboarding_allset_cta),
                     onClick = onFinish,

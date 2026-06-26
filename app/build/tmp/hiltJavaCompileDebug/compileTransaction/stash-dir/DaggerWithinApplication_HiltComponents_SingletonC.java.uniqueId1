@@ -8,16 +8,36 @@ import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.Gson;
+import com.within.app.billing.BillingManager;
+import com.within.app.data.local.WithinDatabase;
+import com.within.app.data.local.dao.DayProgressDao;
+import com.within.app.data.local.dao.JournalEntryDao;
+import com.within.app.data.local.dao.JourneyProgressDao;
 import com.within.app.data.preferences.UserPreferences;
+import com.within.app.data.repository.JourneyProgressRepository;
+import com.within.app.data.repository.JourneyRepository;
 import com.within.app.data.repository.MessageRepository;
 import com.within.app.di.AppModule_ProvideGsonFactory;
+import com.within.app.di.DatabaseModule_ProvideDayProgressDaoFactory;
+import com.within.app.di.DatabaseModule_ProvideJournalEntryDaoFactory;
+import com.within.app.di.DatabaseModule_ProvideJourneyProgressDaoFactory;
+import com.within.app.di.DatabaseModule_ProvideWithinDatabaseFactory;
 import com.within.app.notification.BootReceiver;
 import com.within.app.notification.BootReceiver_MembersInjector;
+import com.within.app.notification.DailyContentResolver;
 import com.within.app.notification.NotificationReceiver;
 import com.within.app.notification.NotificationReceiver_MembersInjector;
 import com.within.app.notification.NotificationScheduler;
 import com.within.app.ui.home.HomeViewModel;
 import com.within.app.ui.home.HomeViewModel_HiltModules;
+import com.within.app.ui.journey.JourneyDayViewModel;
+import com.within.app.ui.journey.JourneyDayViewModel_HiltModules;
+import com.within.app.ui.journey.JourneyMapViewModel;
+import com.within.app.ui.journey.JourneyMapViewModel_HiltModules;
+import com.within.app.ui.journey.JourneyTodayViewModel;
+import com.within.app.ui.journey.JourneyTodayViewModel_HiltModules;
+import com.within.app.ui.journey.ReflectionsViewModel;
+import com.within.app.ui.journey.ReflectionsViewModel_HiltModules;
 import com.within.app.ui.navigation.NavigationViewModel;
 import com.within.app.ui.navigation.NavigationViewModel_HiltModules;
 import com.within.app.ui.onboarding.OnboardingViewModel;
@@ -374,7 +394,8 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
     }
 
     @Override
-    public void injectMainActivity(MainActivity arg0) {
+    public void injectMainActivity(MainActivity mainActivity) {
+      injectMainActivity2(mainActivity);
     }
 
     @Override
@@ -384,7 +405,7 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
 
     @Override
     public Map<Class<?>, Boolean> getViewModelKeys() {
-      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(4).put(LazyClassKeyProvider.com_within_app_ui_home_HomeViewModel, HomeViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_navigation_NavigationViewModel, NavigationViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_onboarding_OnboardingViewModel, OnboardingViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_settings_SettingsViewModel, SettingsViewModel_HiltModules.KeyModule.provide()).build());
+      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(8).put(LazyClassKeyProvider.com_within_app_ui_home_HomeViewModel, HomeViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_journey_JourneyDayViewModel, JourneyDayViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_journey_JourneyMapViewModel, JourneyMapViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_journey_JourneyTodayViewModel, JourneyTodayViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_navigation_NavigationViewModel, NavigationViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_onboarding_OnboardingViewModel, OnboardingViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_journey_ReflectionsViewModel, ReflectionsViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_within_app_ui_settings_SettingsViewModel, SettingsViewModel_HiltModules.KeyModule.provide()).build());
     }
 
     @Override
@@ -402,31 +423,59 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
       return new ViewCBuilder(singletonCImpl, activityRetainedCImpl, activityCImpl);
     }
 
+    @CanIgnoreReturnValue
+    private MainActivity injectMainActivity2(MainActivity instance) {
+      MainActivity_MembersInjector.injectBillingManager(instance, singletonCImpl.billingManagerProvider.get());
+      return instance;
+    }
+
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_within_app_ui_home_HomeViewModel = "com.within.app.ui.home.HomeViewModel";
-
       static String com_within_app_ui_navigation_NavigationViewModel = "com.within.app.ui.navigation.NavigationViewModel";
-
-      static String com_within_app_ui_onboarding_OnboardingViewModel = "com.within.app.ui.onboarding.OnboardingViewModel";
 
       static String com_within_app_ui_settings_SettingsViewModel = "com.within.app.ui.settings.SettingsViewModel";
 
-      @KeepFieldType
-      HomeViewModel com_within_app_ui_home_HomeViewModel2;
+      static String com_within_app_ui_journey_JourneyMapViewModel = "com.within.app.ui.journey.JourneyMapViewModel";
+
+      static String com_within_app_ui_home_HomeViewModel = "com.within.app.ui.home.HomeViewModel";
+
+      static String com_within_app_ui_journey_ReflectionsViewModel = "com.within.app.ui.journey.ReflectionsViewModel";
+
+      static String com_within_app_ui_journey_JourneyDayViewModel = "com.within.app.ui.journey.JourneyDayViewModel";
+
+      static String com_within_app_ui_onboarding_OnboardingViewModel = "com.within.app.ui.onboarding.OnboardingViewModel";
+
+      static String com_within_app_ui_journey_JourneyTodayViewModel = "com.within.app.ui.journey.JourneyTodayViewModel";
 
       @KeepFieldType
       NavigationViewModel com_within_app_ui_navigation_NavigationViewModel2;
 
       @KeepFieldType
+      SettingsViewModel com_within_app_ui_settings_SettingsViewModel2;
+
+      @KeepFieldType
+      JourneyMapViewModel com_within_app_ui_journey_JourneyMapViewModel2;
+
+      @KeepFieldType
+      HomeViewModel com_within_app_ui_home_HomeViewModel2;
+
+      @KeepFieldType
+      ReflectionsViewModel com_within_app_ui_journey_ReflectionsViewModel2;
+
+      @KeepFieldType
+      JourneyDayViewModel com_within_app_ui_journey_JourneyDayViewModel2;
+
+      @KeepFieldType
       OnboardingViewModel com_within_app_ui_onboarding_OnboardingViewModel2;
 
       @KeepFieldType
-      SettingsViewModel com_within_app_ui_settings_SettingsViewModel2;
+      JourneyTodayViewModel com_within_app_ui_journey_JourneyTodayViewModel2;
     }
   }
 
   private static final class ViewModelCImpl extends WithinApplication_HiltComponents.ViewModelC {
+    private final SavedStateHandle savedStateHandle;
+
     private final SingletonCImpl singletonCImpl;
 
     private final ActivityRetainedCImpl activityRetainedCImpl;
@@ -435,9 +484,17 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
 
     private Provider<HomeViewModel> homeViewModelProvider;
 
+    private Provider<JourneyDayViewModel> journeyDayViewModelProvider;
+
+    private Provider<JourneyMapViewModel> journeyMapViewModelProvider;
+
+    private Provider<JourneyTodayViewModel> journeyTodayViewModelProvider;
+
     private Provider<NavigationViewModel> navigationViewModelProvider;
 
     private Provider<OnboardingViewModel> onboardingViewModelProvider;
+
+    private Provider<ReflectionsViewModel> reflectionsViewModelProvider;
 
     private Provider<SettingsViewModel> settingsViewModelProvider;
 
@@ -446,7 +503,7 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
         ViewModelLifecycle viewModelLifecycleParam) {
       this.singletonCImpl = singletonCImpl;
       this.activityRetainedCImpl = activityRetainedCImpl;
-
+      this.savedStateHandle = savedStateHandleParam;
       initialize(savedStateHandleParam, viewModelLifecycleParam);
 
     }
@@ -455,14 +512,18 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
     private void initialize(final SavedStateHandle savedStateHandleParam,
         final ViewModelLifecycle viewModelLifecycleParam) {
       this.homeViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 0);
-      this.navigationViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
-      this.onboardingViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
-      this.settingsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 3);
+      this.journeyDayViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
+      this.journeyMapViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
+      this.journeyTodayViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 3);
+      this.navigationViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 4);
+      this.onboardingViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 5);
+      this.reflectionsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 6);
+      this.settingsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 7);
     }
 
     @Override
     public Map<Class<?>, javax.inject.Provider<ViewModel>> getHiltViewModelMap() {
-      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(4).put(LazyClassKeyProvider.com_within_app_ui_home_HomeViewModel, ((Provider) homeViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_navigation_NavigationViewModel, ((Provider) navigationViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_onboarding_OnboardingViewModel, ((Provider) onboardingViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_settings_SettingsViewModel, ((Provider) settingsViewModelProvider)).build());
+      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(8).put(LazyClassKeyProvider.com_within_app_ui_home_HomeViewModel, ((Provider) homeViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_journey_JourneyDayViewModel, ((Provider) journeyDayViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_journey_JourneyMapViewModel, ((Provider) journeyMapViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_journey_JourneyTodayViewModel, ((Provider) journeyTodayViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_navigation_NavigationViewModel, ((Provider) navigationViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_onboarding_OnboardingViewModel, ((Provider) onboardingViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_journey_ReflectionsViewModel, ((Provider) reflectionsViewModelProvider)).put(LazyClassKeyProvider.com_within_app_ui_settings_SettingsViewModel, ((Provider) settingsViewModelProvider)).build());
     }
 
     @Override
@@ -472,13 +533,30 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
+      static String com_within_app_ui_settings_SettingsViewModel = "com.within.app.ui.settings.SettingsViewModel";
+
+      static String com_within_app_ui_journey_JourneyDayViewModel = "com.within.app.ui.journey.JourneyDayViewModel";
+
+      static String com_within_app_ui_journey_ReflectionsViewModel = "com.within.app.ui.journey.ReflectionsViewModel";
+
       static String com_within_app_ui_home_HomeViewModel = "com.within.app.ui.home.HomeViewModel";
 
       static String com_within_app_ui_navigation_NavigationViewModel = "com.within.app.ui.navigation.NavigationViewModel";
 
       static String com_within_app_ui_onboarding_OnboardingViewModel = "com.within.app.ui.onboarding.OnboardingViewModel";
 
-      static String com_within_app_ui_settings_SettingsViewModel = "com.within.app.ui.settings.SettingsViewModel";
+      static String com_within_app_ui_journey_JourneyMapViewModel = "com.within.app.ui.journey.JourneyMapViewModel";
+
+      static String com_within_app_ui_journey_JourneyTodayViewModel = "com.within.app.ui.journey.JourneyTodayViewModel";
+
+      @KeepFieldType
+      SettingsViewModel com_within_app_ui_settings_SettingsViewModel2;
+
+      @KeepFieldType
+      JourneyDayViewModel com_within_app_ui_journey_JourneyDayViewModel2;
+
+      @KeepFieldType
+      ReflectionsViewModel com_within_app_ui_journey_ReflectionsViewModel2;
 
       @KeepFieldType
       HomeViewModel com_within_app_ui_home_HomeViewModel2;
@@ -490,7 +568,10 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
       OnboardingViewModel com_within_app_ui_onboarding_OnboardingViewModel2;
 
       @KeepFieldType
-      SettingsViewModel com_within_app_ui_settings_SettingsViewModel2;
+      JourneyMapViewModel com_within_app_ui_journey_JourneyMapViewModel2;
+
+      @KeepFieldType
+      JourneyTodayViewModel com_within_app_ui_journey_JourneyTodayViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {
@@ -517,13 +598,25 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
           case 0: // com.within.app.ui.home.HomeViewModel 
           return (T) new HomeViewModel(singletonCImpl.messageRepositoryProvider.get(), singletonCImpl.userPreferencesProvider.get());
 
-          case 1: // com.within.app.ui.navigation.NavigationViewModel 
+          case 1: // com.within.app.ui.journey.JourneyDayViewModel 
+          return (T) new JourneyDayViewModel(singletonCImpl.journeyRepositoryProvider.get(), singletonCImpl.journeyProgressRepositoryProvider.get(), singletonCImpl.userPreferencesProvider.get(), singletonCImpl.billingManagerProvider.get(), viewModelCImpl.savedStateHandle);
+
+          case 2: // com.within.app.ui.journey.JourneyMapViewModel 
+          return (T) new JourneyMapViewModel(singletonCImpl.journeyRepositoryProvider.get(), singletonCImpl.journeyProgressRepositoryProvider.get());
+
+          case 3: // com.within.app.ui.journey.JourneyTodayViewModel 
+          return (T) new JourneyTodayViewModel(singletonCImpl.journeyRepositoryProvider.get(), singletonCImpl.journeyProgressRepositoryProvider.get(), singletonCImpl.userPreferencesProvider.get());
+
+          case 4: // com.within.app.ui.navigation.NavigationViewModel 
           return (T) new NavigationViewModel(singletonCImpl.userPreferencesProvider.get());
 
-          case 2: // com.within.app.ui.onboarding.OnboardingViewModel 
-          return (T) new OnboardingViewModel(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.userPreferencesProvider.get(), singletonCImpl.notificationSchedulerProvider.get());
+          case 5: // com.within.app.ui.onboarding.OnboardingViewModel 
+          return (T) new OnboardingViewModel(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.userPreferencesProvider.get(), singletonCImpl.notificationSchedulerProvider.get(), singletonCImpl.journeyRepositoryProvider.get(), singletonCImpl.journeyProgressRepositoryProvider.get());
 
-          case 3: // com.within.app.ui.settings.SettingsViewModel 
+          case 6: // com.within.app.ui.journey.ReflectionsViewModel 
+          return (T) new ReflectionsViewModel(singletonCImpl.journeyRepositoryProvider.get(), singletonCImpl.journeyProgressRepositoryProvider.get());
+
+          case 7: // com.within.app.ui.settings.SettingsViewModel 
           return (T) new SettingsViewModel(singletonCImpl.userPreferencesProvider.get(), singletonCImpl.notificationSchedulerProvider.get());
 
           default: throw new AssertionError(id);
@@ -612,7 +705,17 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
 
     private Provider<Gson> provideGsonProvider;
 
+    private Provider<JourneyRepository> journeyRepositoryProvider;
+
+    private Provider<WithinDatabase> provideWithinDatabaseProvider;
+
+    private Provider<JourneyProgressRepository> journeyProgressRepositoryProvider;
+
     private Provider<MessageRepository> messageRepositoryProvider;
+
+    private Provider<DailyContentResolver> dailyContentResolverProvider;
+
+    private Provider<BillingManager> billingManagerProvider;
 
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
@@ -620,26 +723,43 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
 
     }
 
+    private JourneyProgressDao journeyProgressDao() {
+      return DatabaseModule_ProvideJourneyProgressDaoFactory.provideJourneyProgressDao(provideWithinDatabaseProvider.get());
+    }
+
+    private DayProgressDao dayProgressDao() {
+      return DatabaseModule_ProvideDayProgressDaoFactory.provideDayProgressDao(provideWithinDatabaseProvider.get());
+    }
+
+    private JournalEntryDao journalEntryDao() {
+      return DatabaseModule_ProvideJournalEntryDaoFactory.provideJournalEntryDao(provideWithinDatabaseProvider.get());
+    }
+
     @SuppressWarnings("unchecked")
     private void initialize(final ApplicationContextModule applicationContextModuleParam) {
       this.userPreferencesProvider = DoubleCheck.provider(new SwitchingProvider<UserPreferences>(singletonCImpl, 0));
       this.notificationSchedulerProvider = DoubleCheck.provider(new SwitchingProvider<NotificationScheduler>(singletonCImpl, 1));
-      this.provideGsonProvider = DoubleCheck.provider(new SwitchingProvider<Gson>(singletonCImpl, 3));
-      this.messageRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<MessageRepository>(singletonCImpl, 2));
+      this.provideGsonProvider = DoubleCheck.provider(new SwitchingProvider<Gson>(singletonCImpl, 4));
+      this.journeyRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<JourneyRepository>(singletonCImpl, 3));
+      this.provideWithinDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<WithinDatabase>(singletonCImpl, 6));
+      this.journeyProgressRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<JourneyProgressRepository>(singletonCImpl, 5));
+      this.messageRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<MessageRepository>(singletonCImpl, 7));
+      this.dailyContentResolverProvider = DoubleCheck.provider(new SwitchingProvider<DailyContentResolver>(singletonCImpl, 2));
+      this.billingManagerProvider = DoubleCheck.provider(new SwitchingProvider<BillingManager>(singletonCImpl, 8));
     }
 
     @Override
-    public void injectWithinApplication(WithinApplication arg0) {
+    public void injectWithinApplication(WithinApplication withinApplication) {
     }
 
     @Override
-    public void injectBootReceiver(BootReceiver arg0) {
-      injectBootReceiver2(arg0);
+    public void injectBootReceiver(BootReceiver bootReceiver) {
+      injectBootReceiver2(bootReceiver);
     }
 
     @Override
-    public void injectNotificationReceiver(NotificationReceiver arg0) {
-      injectNotificationReceiver2(arg0);
+    public void injectNotificationReceiver(NotificationReceiver notificationReceiver) {
+      injectNotificationReceiver2(notificationReceiver);
     }
 
     @Override
@@ -666,7 +786,7 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
 
     @CanIgnoreReturnValue
     private NotificationReceiver injectNotificationReceiver2(NotificationReceiver instance) {
-      NotificationReceiver_MembersInjector.injectMessageRepository(instance, messageRepositoryProvider.get());
+      NotificationReceiver_MembersInjector.injectDailyContentResolver(instance, dailyContentResolverProvider.get());
       NotificationReceiver_MembersInjector.injectUserPreferences(instance, userPreferencesProvider.get());
       NotificationReceiver_MembersInjector.injectNotificationScheduler(instance, notificationSchedulerProvider.get());
       return instance;
@@ -692,11 +812,26 @@ public final class DaggerWithinApplication_HiltComponents_SingletonC {
           case 1: // com.within.app.notification.NotificationScheduler 
           return (T) new NotificationScheduler(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 2: // com.within.app.data.repository.MessageRepository 
+          case 2: // com.within.app.notification.DailyContentResolver 
+          return (T) new DailyContentResolver(singletonCImpl.journeyRepositoryProvider.get(), singletonCImpl.journeyProgressRepositoryProvider.get(), singletonCImpl.messageRepositoryProvider.get(), singletonCImpl.userPreferencesProvider.get());
+
+          case 3: // com.within.app.data.repository.JourneyRepository 
+          return (T) new JourneyRepository(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.provideGsonProvider.get());
+
+          case 4: // com.google.gson.Gson 
+          return (T) AppModule_ProvideGsonFactory.provideGson();
+
+          case 5: // com.within.app.data.repository.JourneyProgressRepository 
+          return (T) new JourneyProgressRepository(singletonCImpl.journeyProgressDao(), singletonCImpl.dayProgressDao(), singletonCImpl.journalEntryDao());
+
+          case 6: // com.within.app.data.local.WithinDatabase 
+          return (T) DatabaseModule_ProvideWithinDatabaseFactory.provideWithinDatabase(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 7: // com.within.app.data.repository.MessageRepository 
           return (T) new MessageRepository(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.provideGsonProvider.get());
 
-          case 3: // com.google.gson.Gson 
-          return (T) AppModule_ProvideGsonFactory.provideGson();
+          case 8: // com.within.app.billing.BillingManager 
+          return (T) new BillingManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.userPreferencesProvider.get());
 
           default: throw new AssertionError(id);
         }
